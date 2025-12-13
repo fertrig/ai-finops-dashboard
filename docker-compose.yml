@@ -1,0 +1,15 @@
+services:
+  server:
+    build: ./server
+    ports:
+      - "3001:3001"
+    environment:
+      - NODE_ENV=production
+      - PORT=3001
+
+  # dashboard:
+  #   build: ./dashboard
+  #   ports:
+  #     - "3000:80"
+  #   depends_on:
+  #     - server
