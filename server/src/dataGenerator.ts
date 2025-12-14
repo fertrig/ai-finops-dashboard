@@ -1,4 +1,5 @@
 import { MetricUpdate, TenantConfig, CustomerConfig, AIModel } from './types';
+import { TENANT_CONFIGS } from './tenants';
 
 const ONE_SECOND_MS = 1000;
 const DATA_GENERATION_INTERVAL_MS = ONE_SECOND_MS;
@@ -36,40 +37,6 @@ const MODEL_PRICING: Record<AIModel, { input: number; output: number }> = {
   'claude-3-opus': { input: 0.015, output: 0.075 },
   'claude-3-sonnet': { input: 0.003, output: 0.015 },
 };
-
-// Tenant configurations for realistic multi-tenant data
-const TENANT_CONFIGS: TenantConfig[] = [
-  {
-    tenantId: 'tenant-acme',
-    customers: [
-      { customerId: 'acme-prod', model: 'gpt-4', mockBaseCallsPerSecond: 8 },
-      { customerId: 'acme-dev', model: 'gpt-3.5-turbo', mockBaseCallsPerSecond: 12 },
-      { customerId: 'acme-staging', model: 'gpt-4', mockBaseCallsPerSecond: 3 },
-    ],
-  },
-  {
-    tenantId: 'tenant-globex',
-    customers: [
-      { customerId: 'globex-main', model: 'claude-3-opus', mockBaseCallsPerSecond: 5 },
-      { customerId: 'globex-analytics', model: 'claude-3-sonnet', mockBaseCallsPerSecond: 10 },
-    ],
-  },
-  {
-    tenantId: 'tenant-initech',
-    customers: [
-      { customerId: 'initech-api', model: 'gpt-3.5-turbo', mockBaseCallsPerSecond: 20 },
-      { customerId: 'initech-web', model: 'gpt-4', mockBaseCallsPerSecond: 4 },
-      { customerId: 'initech-mobile', model: 'gpt-3.5-turbo', mockBaseCallsPerSecond: 15 },
-    ],
-  },
-  {
-    tenantId: 'tenant-umbrella',
-    customers: [
-      { customerId: 'umbrella-research', model: 'claude-3-opus', mockBaseCallsPerSecond: 6 },
-      { customerId: 'umbrella-assistant', model: 'claude-3-sonnet', mockBaseCallsPerSecond: 12 },
-    ],
-  },
-];
 
 // In-memory storage for generated metrics
 let metricsHistory: MetricUpdate[] = [];
@@ -178,28 +145,34 @@ export function generateMetrics(fromTime: number, toTime: number): MetricUpdate[
   return metrics;
 }
 
-// Initialize history with past 5 minutes of data
+// Initialize history with past 1 hour of data
 export function initializeHistory(): void {
   const now = Date.now();
-  const fiveMinutesAgo = now - 5 * 60 * ONE_SECOND_MS;
-  metricsHistory = generateMetrics(fiveMinutesAgo, now);
+  const oneHourAgo = now - 60 * 60 * ONE_SECOND_MS;
+  metricsHistory = generateMetrics(oneHourAgo, now);
   lastGenerationTime = now;
   console.log(`Initialized history with ${metricsHistory.length} metrics`);
 }
 
 // Get metrics since a timestamp (for polling)
 export function getMetricsSince(sinceTimestamp: number): MetricUpdate[] {
-  // Generate any new metrics since last generation
   const now = Date.now();
+
+  // Generate any new metrics since last generation
   if (now > lastGenerationTime + ONE_SECOND_MS) {
-    const newMetrics = generateMetrics(lastGenerationTime + ONE_SECOND_MS, now);
-    metricsHistory.push(...newMetrics);
+    // Limit generation to max 30 seconds to prevent stack overflow
+    const maxGenerationWindow = 30 * ONE_SECOND_MS;
+    const fromTime = Math.max(lastGenerationTime + ONE_SECOND_MS, now - maxGenerationWindow);
+
+    const newMetrics = generateMetrics(fromTime, now);
+    // Use concat instead of spread to avoid stack overflow with large arrays
+    metricsHistory = metricsHistory.concat(newMetrics);
     lastGenerationTime = now;
 
-    // Keep only last 10 minutes of history to prevent memory growth
-    const tenMinutesAgo = now - 10 * 60 * ONE_SECOND_MS;
+    // Keep only last 1 hour of history to prevent memory growth
+    const oneHourAgo = now - 60 * 60 * ONE_SECOND_MS;
     metricsHistory = metricsHistory.filter(
-      (m) => new Date(m.timestamp).getTime() > tenMinutesAgo
+      (m) => new Date(m.timestamp).getTime() > oneHourAgo
     );
   }
 
@@ -231,27 +204,27 @@ export function getAggregatedStats(): {
 } {
   const now = Date.now();
   const oneHourAgo = now - 60 * 60 * 1000;
-  const recentMetrics = metricsHistory.filter(
+  const oneHourAgoMetrics = metricsHistory.filter(
     (m) => new Date(m.timestamp).getTime() > oneHourAgo
   );
 
   // Calculate total cost per hour
-  const totalCost = recentMetrics.reduce((sum, m) => sum + m.metrics.totalCost, 0);
+  const totalCost = oneHourAgoMetrics.reduce((sum, m) => sum + m.metrics.totalCost, 0);
 
   // Calculate top customers
   const customerCosts = new Map<string, number>();
-  for (const metric of recentMetrics) {
+  for (const metric of oneHourAgoMetrics) {
     const current = customerCosts.get(metric.customerId) || 0;
     customerCosts.set(metric.customerId, current + metric.metrics.totalCost);
   }
   const topCustomers = Array.from(customerCosts.entries())
     .map(([customerId, totalCost]) => ({ customerId, totalCost }))
     .sort((a, b) => b.totalCost - a.totalCost)
-    .slice(0, 10);
+    .slice(0, 100);
 
   // Calculate cost by model (now directly from metric)
   const costByModel: Record<string, number> = {};
-  for (const metric of recentMetrics) {
+  for (const metric of oneHourAgoMetrics) {
     costByModel[metric.model] = (costByModel[metric.model] || 0) + metric.metrics.totalCost;
   }
 

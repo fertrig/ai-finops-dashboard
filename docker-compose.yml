@@ -7,9 +7,9 @@ services:
       - NODE_ENV=production
       - PORT=3001
 
-  # dashboard:
-  #   build: ./dashboard
-  #   ports:
-  #     - "3000:80"
-  #   depends_on:
-  #     - server
+  dashboard:
+    build: ./dashboard
+    ports:
+      - "3000:80"
+    depends_on:
+      - server
