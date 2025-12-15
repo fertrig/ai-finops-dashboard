@@ -30,6 +30,10 @@ Other adjustments:
 - Fixed responsiveness of header and polling controls.
 - Adjusted colors of polling controls.
 
+Cost Gauge:
+I picked an arbitrary max cost of $250,000 to show a proper gauge with a needle that goes from left to right.
+
+
 I asked the AI to estimate the memory required to store 5 minutes of metrics... 
 
 To do:
