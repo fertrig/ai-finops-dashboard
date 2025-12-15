@@ -180,22 +180,6 @@ export function getMetricsSince(sinceTimestamp: number): MetricUpdate[] {
   return metricsHistory.filter((m) => new Date(m.timestamp).getTime() > sinceTimestamp);
 }
 
-// Get historical metrics for a time range
-export function getHistoricalMetrics(fromTime: number, toTime: number): MetricUpdate[] {
-  // Check if we have this data in history
-  const existingMetrics = metricsHistory.filter((m) => {
-    const time = new Date(m.timestamp).getTime();
-    return time >= fromTime && time <= toTime;
-  });
-
-  if (existingMetrics.length > 0) {
-    return existingMetrics;
-  }
-
-  // Generate historical data on demand
-  return generateMetrics(fromTime, toTime);
-}
-
 // Get aggregated stats for dashboard
 export function getAggregatedStats(): {
   totalCostPerHour: number;

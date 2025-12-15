@@ -6,11 +6,16 @@ I used Claude Code, model Opus 4.5, to assist me in the completion of the projec
  
 To generate the metrics, I used a function to generate normally distributed random numbers instead of a simply using Math.random(). This is more realistic and provides a better distribution of the generated data.
 
-The "metrics since" endpoint could ask for metrics since a very long time ago, which would require generating a lot of data which could consume a lot of memory in the server. I tested this scenario which crashed the server. To fix this bug, I added a limit to the generation window to 30 seconds. Another solution I considered was to validate the parameter input and return an error if the since timestamp is too far in the past. This last approach would require frontend code to handle the error so I chose the first approach because it's simpler.
+The "metrics since" endpoint could ask for metrics since a very long time ago, which would require generating a lot of data which could consume a lot of memory in the server. I tested this scenario which crashed the server. To fix this bug, I hardened the server input validation to prevent integer overflow and to prevent the since timestamp from being in the future or more than 1 hour in the past. I also added tests for the input validation.
 
 To requirements mention that the dashboard "must handle hundreds of metric updates per second". Thus, I instructed the AI to generate 100 customers across 7 tenants.
 
+The requirements also called for aggregated-like charts, like spend per hour, top customer, etc. I decided to calculate the stats on the server side and send them to the frontend. This is more efficient than calculating the stats on the frontend side which would require the frontend to download all the data and then calculate the stats.
+
 I set the data generation interval to 1 second. Every time the call to "metrics since" is made, new metrics are generated and added to the history. The "stats" endpoint uses all that data to calculate hourly stats. There were several issues with the initial code generation, for example, it was only calculating stats for a few minutes of data, it was trimming the history to only keep the last 10 minutes of data, it was also using a lot of magic numbers, etc.
+
+I removed code that I was not planning to implement like the /metrics/history endpoint. I don't like to leave code that is not exercised or fully tested.
+
 
 After I felt the server code was stable enough, I moved on to the frontend.
 
