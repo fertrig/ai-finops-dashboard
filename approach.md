@@ -56,6 +56,7 @@ To do:
 - Implement something like trpc.io to enable type safe communication between frontend and backend.
 - Tighten up CORS, it currently allows all origins.
 - Tests for the client-side buffering are important. I run out of time to implement them.
+- Review the tests generated for the react components.
 
 
 More on testing:
