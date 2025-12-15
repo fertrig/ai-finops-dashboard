@@ -33,7 +33,7 @@ export function TopCustomersTable() {
             <TableHeader>
               <TableRow>
                 <TableHead className="w-12">#</TableHead>
-                <TableHead>Customer ID</TableHead>
+                <TableHead>Customer ID (tenant-customer)</TableHead>
                 <TableHead className="text-right">Total Cost</TableHead>
               </TableRow>
             </TableHeader>

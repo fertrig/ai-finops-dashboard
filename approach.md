@@ -38,6 +38,7 @@ Other adjustments:
 Cost Gauge:
 I picked an arbitrary max cost of $250,000 to show a proper gauge with a needle that goes from left to right.
 
+There was no requirement to display tenants on the dashboard. However, I think it would be useful to know the tenant for the top spenders thus I implemented a simple solution. I added a label to the top customers table to let the user know that the tenant is part of the customer id.
 
 I asked the AI to estimate the memory required to store 5 minutes of metrics... 
 
@@ -45,3 +46,4 @@ To do:
 - Displaying "reconnecting" on the dashboard when the exponential backoff is in progress.
 - Implementation and testing of 24 hours of metrics.
 - Fix labels on x-axis of token usage chart.
+- Implement something like trpc.io to enable type safe communication between frontend and backend.
