@@ -78,10 +78,10 @@ The most interesting document is [approach.md](docs/approach.md) which documents
 
 ### Features Not Implemented (Time Constraints)
 
-❌ **Anomaly Detection Visualization** - Not implemented
-❌ **Time Window Controls** - Not implemented (focused on real-time 5-minute window)
-❌ **Historical Data Endpoint** - Not implemented (focused on real-time metrics)
-❌ **SSE/WebSocket Streaming** - Not implemented (used polling as specified)
+- **Anomaly Detection Visualization** - Not implemented
+- **Time Window Controls** - Not implemented (focused on real-time 5-minute window)
+- **Historical Data Endpoint** - Not implemented (focused on real-time metrics)
+- **SSE/WebSocket Streaming** - Not implemented (used polling as specified)
 
 ## Project Structure
 
