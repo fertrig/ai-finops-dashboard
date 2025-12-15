@@ -6,5 +6,5 @@ docker compose up
 ```
 
 Recording of the dashboard in action:
-
-<video src="docs/ai-finops-dashboard-01.mp4" controls></video>
+- [docs/ai-finops-dashboard-01.mov](docs/ai-finops-dashboard-01.mov)
+- [docs/ai-finops-dashboard-01.mp4](docs/ai-finops-dashboard-01.mp4)
