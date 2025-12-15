@@ -78,39 +78,10 @@ The most interesting document is [approach.md](docs/approach.md) which documents
 
 ### Features Not Implemented (Time Constraints)
 
-- **Anomaly Detection Visualization** - Not implemented
-- **Time Window Controls** - Not implemented (focused on real-time 5-minute window)
-- **Historical Data Endpoint** - Not implemented (focused on real-time metrics)
-- **SSE/WebSocket Streaming** - Not implemented (used polling as specified)
+- Anomaly Detection Visualization
+- Time Window Controls (focused on real-time 5-minute window)
+- Historical Data Endpoint (focused on real-time metrics)
 
-## Project Structure
-
-```
-revenium-take-home/
-├── dashboard/              # React frontend application
-│   ├── src/
-│   │   ├── api/           # API client layer
-│   │   ├── components/    # React components
-│   │   ├── hooks/         # Custom React hooks
-│   │   ├── stores/         # Zustand state management
-│   │   ├── utils/          # Utility functions
-│   │   └── types/          # TypeScript definitions
-│   └── Dockerfile
-├── server/                 # Express backend API
-│   ├── src/
-│   │   ├── index.ts        # Express server and routes
-│   │   ├── dataGenerator.ts # Mock data generation
-│   │   └── types.ts        # Server type definitions
-│   └── Dockerfile
-├── docs/                   # Documentation
-│   ├── architecture-document.md
-│   ├── code-organization.md
-│   ├── component-hierarchy.md
-│   ├── state-management.md
-│   ├── approach.md         # Development approach and decisions
-│   └── memory-estimations.md
-└── docker-compose.yml      # Docker orchestration
-```
 
 ## Performance Characteristics
 
