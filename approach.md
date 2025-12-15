@@ -35,3 +35,4 @@ I asked the AI to estimate the memory required to store 5 minutes of metrics...
 To do:
 - Displaying "reconnecting" on the dashboard when the exponential backoff is in progress.
 - Implementation and testing of 24 hours of metrics.
+- Fix labels on x-axis of token usage chart.
