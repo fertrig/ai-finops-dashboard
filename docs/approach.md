@@ -75,6 +75,7 @@ I would work on the following if I had more time:
 - Tightening up CORS, it currently allows all origins.
 - Implementing tests for the client-side buffering.
 - Review in detail the tests generated for the react components.
+- Production-level readiness like logging, instrumentation, etc.
 
 ## Testing Philosophy
 
