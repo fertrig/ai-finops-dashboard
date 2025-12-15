@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import type { MetricUpdate, AggregatedStats } from '@/types/metrics';
+import { mergeAndProcessMetrics } from '@/utils/metricsUtils';
 
 const MAX_METRICS_AGE_MS = 5 * 60 * 1000; // 5 minutes
 const BUFFER_FLUSH_INTERVAL_MS = 500; // Flush buffer every 500ms to smooth updates
@@ -22,24 +23,17 @@ function scheduleFlush() {
         flushScheduled = false;
 
         const now = Date.now();
-        const cutoffTime = now - MAX_METRICS_AGE_MS;
 
         storeSetFn((state) => {
-          // Combine existing and buffered metrics
-          const allMetrics = [...state.metrics, ...metricsToAdd];
-
-          // Remove old metrics (older than 5 minutes)
-          const filteredMetrics = allMetrics.filter(
-            (m) => new Date(m.timestamp).getTime() > cutoffTime
-          );
-
-          // Sort by timestamp
-          filteredMetrics.sort(
-            (a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
+          const processedMetrics = mergeAndProcessMetrics(
+            state.metrics,
+            metricsToAdd,
+            MAX_METRICS_AGE_MS,
+            now
           );
 
           return {
-            metrics: filteredMetrics,
+            metrics: processedMetrics,
             lastUpdateTime: now,
           };
         });

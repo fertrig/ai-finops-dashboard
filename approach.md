@@ -34,6 +34,7 @@ Other adjustments:
 - Fixed responsiveness of the charts.
 - Fixed responsiveness of header and polling controls.
 - Adjusted colors of polling controls.
+- Refactored complex functions into utility functions which I then unit tested.
 
 Cost Gauge:
 I picked an arbitrary max cost of $250,000 to show a proper gauge with a needle that goes from left to right.
@@ -55,3 +56,8 @@ To do:
 - Implement something like trpc.io to enable type safe communication between frontend and backend.
 - Tighten up CORS, it currently allows all origins.
 - Tests for the client-side buffering are important. I run out of time to implement them.
+
+
+More on testing:
+- I did not add tests for the data generation since that seemed like a mock feature.
+- I added tests for utility functions and complex functions like the backoff logic, time series grouping, and buffer flush logic.
