@@ -38,6 +38,10 @@ Other adjustments:
 Cost Gauge:
 I picked an arbitrary max cost of $250,000 to show a proper gauge with a needle that goes from left to right.
 
+Token Usage Chart:
+The requirements ask for a 5 second resolution on the token usage time serires which works well for intervals of 5 seconds or more. However, when the polling interval is less than 5 seconds, the chart tail behaves oddly as it waits for more data to arrive. I think a better UX is if the resolution of the time series is the same as the polling interval which is what I implemented: as you change the polling interval, the chart resolution changes accordingly which yields a smoother time series.
+
+Top Customers Table:
 There was no requirement to display tenants on the dashboard. However, I think it would be useful to know the tenant for the top spenders thus I implemented a simple solution. I added a label to the top customers table to let the user know that the tenant is part of the customer id.
 
 I asked the AI to estimate the memory required to store 5 minutes of metrics... 

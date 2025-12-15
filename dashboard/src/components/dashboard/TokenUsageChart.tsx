@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useMetricsStore, selectMetrics } from '@/stores/metricsStore';
+import { useSettingsStore, selectPollingInterval } from '@/stores/settingsStore';
 import { formatCompactNumber, formatShortTime } from '@/utils/formatters';
 import {
   AreaChart,
@@ -12,17 +13,16 @@ import {
   ResponsiveContainer,
 } from 'recharts';
 
-const FIVE_SECONDS_MS = 5 * 1000;
-
 export function TokenUsageChart() {
   const metrics = useMetricsStore(selectMetrics);
+  const pollingInterval = useSettingsStore(selectPollingInterval);
 
   const timeSeries = useMemo(() => {
-    // Group by timestamp (rounded to 5 seconds)
+    // Group by timestamp (rounded to polling interval)
     const grouped = new Map<number, number>();
 
     metrics.forEach((m) => {
-      const ts = Math.floor(new Date(m.timestamp).getTime() / FIVE_SECONDS_MS) * FIVE_SECONDS_MS;
+      const ts = Math.floor(new Date(m.timestamp).getTime() / pollingInterval) * pollingInterval;
       const current = grouped.get(ts) || 0;
       grouped.set(ts, current + m.metrics.totalTokens);
     });
@@ -34,7 +34,7 @@ export function TokenUsageChart() {
         time: formatShortTime(new Date(timestamp)),
       }))
       .sort((a, b) => a.timestamp - b.timestamp);
-  }, [metrics]);
+  }, [metrics, pollingInterval]);
 
   const totalTokens = useMemo(() => {
     return timeSeries.reduce((sum, point) => sum + point.tokens, 0);
