@@ -2,6 +2,53 @@ import { create } from 'zustand';
 import type { MetricUpdate, AggregatedStats } from '@/types/metrics';
 
 const MAX_METRICS_AGE_MS = 5 * 60 * 1000; // 5 minutes
+const BUFFER_FLUSH_INTERVAL_MS = 500; // Flush buffer every 500ms to smooth updates
+
+// Buffer for incoming metrics (outside store to avoid re-renders)
+let metricsBuffer: MetricUpdate[] = [];
+let flushScheduled = false;
+let storeSetFn: ((fn: (state: MetricsState) => Partial<MetricsState>) => void) | null = null;
+
+function scheduleFlush() {
+  if (flushScheduled || !storeSetFn) return;
+  flushScheduled = true;
+
+  // Use requestAnimationFrame for smooth visual updates
+  requestAnimationFrame(() => {
+    setTimeout(() => {
+      if (metricsBuffer.length > 0 && storeSetFn) {
+        const metricsToAdd = metricsBuffer;
+        metricsBuffer = [];
+        flushScheduled = false;
+
+        const now = Date.now();
+        const cutoffTime = now - MAX_METRICS_AGE_MS;
+
+        storeSetFn((state) => {
+          // Combine existing and buffered metrics
+          const allMetrics = [...state.metrics, ...metricsToAdd];
+
+          // Remove old metrics (older than 5 minutes)
+          const filteredMetrics = allMetrics.filter(
+            (m) => new Date(m.timestamp).getTime() > cutoffTime
+          );
+
+          // Sort by timestamp
+          filteredMetrics.sort(
+            (a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
+          );
+
+          return {
+            metrics: filteredMetrics,
+            lastUpdateTime: now,
+          };
+        });
+      } else {
+        flushScheduled = false;
+      }
+    }, BUFFER_FLUSH_INTERVAL_MS);
+  });
+}
 
 interface MetricsState {
   metrics: MetricUpdate[];
@@ -14,44 +61,31 @@ interface MetricsState {
   clearMetrics: () => void;
 }
 
-export const useMetricsStore = create<MetricsState>((set) => ({
-  metrics: [],
-  stats: null,
-  lastUpdateTime: null,
+export const useMetricsStore = create<MetricsState>((set) => {
+  // Store reference to set function for buffer flush
+  storeSetFn = set;
 
-  addMetrics: (newMetrics) => {
-    const now = Date.now();
-    const cutoffTime = now - MAX_METRICS_AGE_MS;
+  return {
+    metrics: [],
+    stats: null,
+    lastUpdateTime: null,
 
-    set((state) => {
-      // Combine existing and new metrics
-      const allMetrics = [...state.metrics, ...newMetrics];
+    addMetrics: (newMetrics) => {
+      // Add to buffer instead of updating store directly
+      metricsBuffer = metricsBuffer.concat(newMetrics);
+      scheduleFlush();
+    },
 
-      // Remove old metrics (older than 5 minutes)
-      const filteredMetrics = allMetrics.filter(
-        (m) => new Date(m.timestamp).getTime() > cutoffTime
-      );
+    setStats: (stats) => {
+      set({ stats });
+    },
 
-      // Sort by timestamp
-      filteredMetrics.sort(
-        (a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
-      );
-
-      return {
-        metrics: filteredMetrics,
-        lastUpdateTime: now,
-      };
-    });
-  },
-
-  setStats: (stats) => {
-    set({ stats });
-  },
-
-  clearMetrics: () => {
-    set({ metrics: [], stats: null, lastUpdateTime: null });
-  },
-}));
+    clearMetrics: () => {
+      metricsBuffer = [];
+      set({ metrics: [], stats: null, lastUpdateTime: null });
+    },
+  };
+});
 
 // Simple selectors (these are stable)
 export const selectMetrics = (state: MetricsState) => state.metrics;
