@@ -44,10 +44,14 @@ The requirements ask for a 5 second resolution on the token usage time serires w
 Top Customers Table:
 There was no requirement to display tenants on the dashboard. However, I think it would be useful to know the tenant for the top spenders thus I implemented a simple solution. I added a label to the top customers table to let the user know that the tenant is part of the customer id.
 
-I asked the AI to estimate the memory required to store 5 minutes of metrics... 
+Memory consumption:
+I asked the AI to estimate the memory used by storing the metrics in memory in both the server and the front end. It estimated that it is less than 10MB for each. More detail results [here](docs/memory-estimations.md).
+I also profiled the dashboard using chrome dev tools. I run "Allocation on timeline" which didn't show any bursts or memory growth over time.
 
 To do:
 - Displaying "reconnecting" on the dashboard when the exponential backoff is in progress.
 - Implementation and testing of 24 hours of metrics.
 - Fix labels on x-axis of token usage chart.
 - Implement something like trpc.io to enable type safe communication between frontend and backend.
+- Tighten up CORS, it currently allows all origins.
+- Tests for the client-side buffering are important. I run out of time to implement them.
